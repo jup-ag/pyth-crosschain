@@ -1,15 +1,13 @@
 [workspace]
 members = [
-    "programs/*",
-    "cli/",
-    "program_simulator/",
+    # "programs/*",
+    # "cli/",
+    # "program_simulator/",
     "pyth_solana_receiver_sdk/",
-    "common_test_utils",
+    # "common_test_utils",
 ]
 
-exclude = [
-    "programs/pyth-price-store"
-]
+exclude = ["programs/pyth-price-store"]
 
 [profile.release]
 overflow-checks = true
@@ -21,12 +19,15 @@ incremental = false
 codegen-units = 1
 
 [workspace.dependencies]
-wormhole-core-bridge-solana = {git = "https://github.com/wormhole-foundation/wormhole", rev = "7bd40b595e22c5512dfaa2ed8e6d7441df743a69"}
-wormhole-vaas-serde =  "0.1.0"
+wormhole-core-bridge-solana = { git = "https://github.com/wormhole-foundation/wormhole", rev = "7bd40b595e22c5512dfaa2ed8e6d7441df743a69" }
+wormhole-vaas-serde = "0.1.0"
 serde_wormhole = "0.1.0"
-anchor-lang = "0.28.0"
-anchor-client = "0.28.0"
-solana-program = "1.16.20"
-solana-program-test = "1.16.20"
-solana-sdk = "1.16.20"
-solana-client = "1.16.20"
+anchor-lang = "0.30.1"
+anchor-client = "0.30.1"
+solana-program = "2"
+solana-program-test = "2"
+solana-sdk = "2"
+solana-client = "2"
+
+[patch.crates-io]
+anchor-lang = { git = "https://github.com/coral-xyz/anchor.git", rev = "4cdb0ebe8f613f7dbbd5c4b00571139b2517898f" }
