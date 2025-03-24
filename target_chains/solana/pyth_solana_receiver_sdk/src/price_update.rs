@@ -123,7 +123,7 @@ impl PriceUpdateV2 {
     ///```
     pub fn get_price_no_older_than_with_custom_verification_level(
         &self,
-        clock: &Clock,
+        timestamp: i64,
         maximum_age: u64,
         feed_id: &FeedId,
         verification_level: VerificationLevel,
@@ -137,7 +137,7 @@ impl PriceUpdateV2 {
             price
                 .publish_time
                 .saturating_add(maximum_age.try_into().unwrap())
-                >= clock.unix_timestamp,
+                >= timestamp,
             GetPriceError::PriceTooOld
         );
         Ok(price)
@@ -167,12 +167,12 @@ impl PriceUpdateV2 {
     ///```
     pub fn get_price_no_older_than(
         &self,
-        clock: &Clock,
+        timestamp: i64,
         maximum_age: u64,
         feed_id: &FeedId,
     ) -> std::result::Result<Price, GetPriceError> {
         self.get_price_no_older_than_with_custom_verification_level(
-            clock,
+            timestamp,
             maximum_age,
             feed_id,
             VerificationLevel::Full,
@@ -343,7 +343,7 @@ pub mod tests {
 
         assert_eq!(
             price_update_unverified.get_price_no_older_than_with_custom_verification_level(
-                &mock_clock,
+                mock_clock.unix_timestamp,
                 100,
                 &feed_id,
                 VerificationLevel::Partial { num_signatures: 5 }
@@ -352,7 +352,7 @@ pub mod tests {
         );
         assert_eq!(
             price_update_partially_verified.get_price_no_older_than_with_custom_verification_level(
-                &mock_clock,
+                mock_clock.unix_timestamp,
                 100,
                 &feed_id,
                 VerificationLevel::Partial { num_signatures: 5 }
@@ -361,7 +361,7 @@ pub mod tests {
         );
         assert_eq!(
             price_update_fully_verified.get_price_no_older_than_with_custom_verification_level(
-                &mock_clock,
+                mock_clock.unix_timestamp,
                 100,
                 &feed_id,
                 VerificationLevel::Partial { num_signatures: 5 }
@@ -370,22 +370,34 @@ pub mod tests {
         );
 
         assert_eq!(
-            price_update_unverified.get_price_no_older_than(&mock_clock, 100, &feed_id,),
+            price_update_unverified.get_price_no_older_than(
+                mock_clock.unix_timestamp,
+                100,
+                &feed_id,
+            ),
             Err(GetPriceError::InsufficientVerificationLevel)
         );
         assert_eq!(
-            price_update_partially_verified.get_price_no_older_than(&mock_clock, 100, &feed_id,),
+            price_update_partially_verified.get_price_no_older_than(
+                mock_clock.unix_timestamp,
+                100,
+                &feed_id,
+            ),
             Err(GetPriceError::InsufficientVerificationLevel)
         );
         assert_eq!(
-            price_update_fully_verified.get_price_no_older_than(&mock_clock, 100, &feed_id,),
+            price_update_fully_verified.get_price_no_older_than(
+                mock_clock.unix_timestamp,
+                100,
+                &feed_id,
+            ),
             Ok(expected_price)
         );
 
         // Reduce maximum_age
         assert_eq!(
             price_update_unverified.get_price_no_older_than_with_custom_verification_level(
-                &mock_clock,
+                mock_clock.unix_timestamp,
                 10,
                 &feed_id,
                 VerificationLevel::Partial { num_signatures: 5 }
@@ -394,7 +406,7 @@ pub mod tests {
         );
         assert_eq!(
             price_update_partially_verified.get_price_no_older_than_with_custom_verification_level(
-                &mock_clock,
+                mock_clock.unix_timestamp,
                 10,
                 &feed_id,
                 VerificationLevel::Partial { num_signatures: 5 }
@@ -403,7 +415,7 @@ pub mod tests {
         );
         assert_eq!(
             price_update_fully_verified.get_price_no_older_than_with_custom_verification_level(
-                &mock_clock,
+                mock_clock.unix_timestamp,
                 10,
                 &feed_id,
                 VerificationLevel::Partial { num_signatures: 5 }
@@ -412,15 +424,27 @@ pub mod tests {
         );
 
         assert_eq!(
-            price_update_unverified.get_price_no_older_than(&mock_clock, 10, &feed_id,),
+            price_update_unverified.get_price_no_older_than(
+                mock_clock.unix_timestamp,
+                10,
+                &feed_id,
+            ),
             Err(GetPriceError::InsufficientVerificationLevel)
         );
         assert_eq!(
-            price_update_partially_verified.get_price_no_older_than(&mock_clock, 10, &feed_id,),
+            price_update_partially_verified.get_price_no_older_than(
+                mock_clock.unix_timestamp,
+                10,
+                &feed_id,
+            ),
             Err(GetPriceError::InsufficientVerificationLevel)
         );
         assert_eq!(
-            price_update_fully_verified.get_price_no_older_than(&mock_clock, 10, &feed_id,),
+            price_update_fully_verified.get_price_no_older_than(
+                mock_clock.unix_timestamp,
+                10,
+                &feed_id,
+            ),
             Err(GetPriceError::PriceTooOld)
         );
 
@@ -431,7 +455,7 @@ pub mod tests {
         );
         assert_eq!(
             price_update_fully_verified.get_price_no_older_than_with_custom_verification_level(
-                &mock_clock,
+                mock_clock.unix_timestamp,
                 100,
                 &mismatched_feed_id,
                 VerificationLevel::Partial { num_signatures: 5 }
@@ -440,7 +464,7 @@ pub mod tests {
         );
         assert_eq!(
             price_update_fully_verified.get_price_no_older_than(
-                &mock_clock,
+                mock_clock.unix_timestamp,
                 100,
                 &mismatched_feed_id,
             ),
